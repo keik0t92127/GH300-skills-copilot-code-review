@@ -4,12 +4,99 @@ MongoDB database configuration and setup for Mergington High School API
 
 from pymongo import MongoClient
 from argon2 import PasswordHasher, exceptions as argon2_exceptions
+import logging
 
-# Connect to MongoDB
-client = MongoClient('mongodb://localhost:27017/')
-db = client['mergington_high']
-activities_collection = db['activities']
-teachers_collection = db['teachers']
+# Try to connect to MongoDB, fall back to in-memory storage if unavailable
+USE_MONGODB = False
+try:
+    client = MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=2000)
+    # Test the connection
+    client.server_info()
+    db = client['mergington_high']
+    activities_collection = db['activities']
+    teachers_collection = db['teachers']
+    USE_MONGODB = True
+    logging.info("Connected to MongoDB")
+except Exception as e:
+    logging.warning(f"MongoDB not available: {e}. Using in-memory storage instead.")
+    # In-memory storage
+    _activities_store = {}
+    _teachers_store = {}
+    
+    class InMemoryCollection:
+        def __init__(self, store):
+            self.store = store
+        
+        def find(self, query=None):
+            """Return all items that match the query"""
+            if not query:
+                return [{"_id": k, **v} for k, v in self.store.items()]
+            
+            result = []
+            for k, v in self.store.items():
+                doc = {"_id": k, **v}
+                if self._match_query(doc, query):
+                    result.append(doc)
+            return result
+        
+        def _match_query(self, doc, query):
+            """Simple query matching"""
+            for key, value in query.items():
+                if key not in doc:
+                    return False
+                if isinstance(value, dict):
+                    # Handle operators like $in, $gte, $lte
+                    if "$in" in value:
+                        if key not in doc:
+                            return False
+                        doc_value = doc[key]
+                        if isinstance(doc_value, list):
+                            if not any(item in value["$in"] for item in doc_value):
+                                return False
+                        elif doc_value not in value["$in"]:
+                            return False
+                    if "$gte" in value and doc.get(key, "") < value["$gte"]:
+                        return False
+                    if "$lte" in value and doc.get(key, "") > value["$lte"]:
+                        return False
+                elif doc[key] != value:
+                    return False
+            return True
+        
+        def find_one(self, query):
+            """Find one document matching the query"""
+            if isinstance(query, dict) and "_id" in query:
+                item_id = query["_id"]
+                if item_id in self.store:
+                    return {"_id": item_id, **self.store[item_id]}
+            return None
+        
+        def insert_one(self, doc):
+            """Insert a document"""
+            item_id = doc.pop("_id")
+            self.store[item_id] = doc
+        
+        def update_one(self, query, update):
+            """Update a document"""
+            if "_id" in query:
+                item_id = query["_id"]
+                if item_id in self.store:
+                    if "$set" in update:
+                        self.store[item_id].update(update["$set"])
+                    if "$push" in update:
+                        for key, value in update["$push"].items():
+                            if key not in self.store[item_id]:
+                                self.store[item_id][key] = []
+                            self.store[item_id][key].append(value)
+        
+        def count_documents(self, query):
+            """Count documents matching query"""
+            if not query:
+                return len(self.store)
+            return len([1 for doc in self.find(query)])
+    
+    activities_collection = InMemoryCollection(_activities_store)
+    teachers_collection = InMemoryCollection(_teachers_store)
 
 # Methods
 

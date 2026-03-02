@@ -672,3 +672,230 @@ footer {
   padding: 15px;
   font-weight: bold;
 }
+
+/* Announcements Container */
+#announcements-container {
+  margin-bottom: 10px;
+}
+
+.announcement-banner {
+  background: linear-gradient(135deg, #ff9800 0%, #fb8c00 100%);
+  color: white;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease;
+}
+
+.announcement-banner h5 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.announcement-banner p {
+  margin: 4px 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.announcement-dates {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Announcements Modal */
+.announcements-modal-content {
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.announcements-modal-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+@media (max-width: 768px) {
+  .announcements-modal-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.announcements-list-section h4,
+.announcements-form-section h4 {
+  color: var(--primary);
+  margin-bottom: 12px;
+  font-size: 1rem;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.announcements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.announcement-item {
+  background-color: var(--background);
+  border-left: 4px solid var(--secondary);
+  padding: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.announcement-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff8f0;
+}
+
+.announcement-item-title {
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.announcement-item-message {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+
+.announcement-item-dates {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.announcement-item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.announcement-item-actions button {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  border-radius: 3px;
+}
+
+.edit-btn {
+  background-color: var(--primary);
+}
+
+.delete-btn {
+  background-color: var(--error);
+}
+
+.no-announcements {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 20px;
+  font-style: italic;
+}
+
+/* Form Styles */
+.announcements-form-section form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: Arial, sans-serif;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 4px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#save-announcement-btn {
+  background-color: var(--secondary);
+  color: white;
+}
+
+#save-announcement-btn:hover {
+  background-color: var(--secondary-dark);
+}
+
+.cancel-btn {
+  background-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.cancel-btn:hover {
+  background-color: var(--border-focus) !important;
+}

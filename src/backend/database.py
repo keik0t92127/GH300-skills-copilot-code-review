@@ -15,6 +15,7 @@ try:
     db = client['mergington_high']
     activities_collection = db['activities']
     teachers_collection = db['teachers']
+    announcements_collection = db['announcements']
     USE_MONGODB = True
     logging.info("Connected to MongoDB")
 except Exception as e:
@@ -69,6 +70,10 @@ except Exception as e:
                 item_id = query["_id"]
                 if item_id in self.store:
                     return {"_id": item_id, **self.store[item_id]}
+                # For numeric IDs, try to find by number
+                for k, v in self.store.items():
+                    if k == item_id or (isinstance(k, (int, float)) and isinstance(item_id, (int, float)) and k == item_id):
+                        return {"_id": k, **v}
             return None
         
         def insert_one(self, doc):
@@ -88,15 +93,30 @@ except Exception as e:
                             if key not in self.store[item_id]:
                                 self.store[item_id][key] = []
                             self.store[item_id][key].append(value)
+                    return {"modified_count": 1}
+            return {"modified_count": 0}
         
         def count_documents(self, query):
             """Count documents matching query"""
             if not query:
                 return len(self.store)
             return len([1 for doc in self.find(query)])
+        
+        def delete_one(self, query):
+            """Delete a document"""
+            if "_id" in query:
+                item_id = query["_id"]
+                if item_id in self.store:
+                    del self.store[item_id]
+                    return {"deleted_count": 1}
+            return {"deleted_count": 0}
     
     activities_collection = InMemoryCollection(_activities_store)
     teachers_collection = InMemoryCollection(_teachers_store)
+    
+    # Add announcements collection for in-memory storage
+    _announcements_store = {}
+    announcements_collection = InMemoryCollection(_announcements_store)
 
 # Methods
 
@@ -136,6 +156,11 @@ def init_database():
         for teacher in initial_teachers:
             teachers_collection.insert_one(
                 {"_id": teacher["username"], **teacher})
+    
+    # Initialize announcements if empty
+    if announcements_collection.count_documents({}) == 0:
+        for announcement in initial_announcements:
+            announcements_collection.insert_one(announcement)
 
 
 # Initial database if empty
@@ -292,5 +317,26 @@ initial_teachers = [
         "display_name": "Principal Martinez",
         "password": hash_password("admin789"),
         "role": "admin"
+    }
+]
+
+initial_announcements = [
+    {
+        "_id": 1,
+        "title": "Activity Registration Open",
+        "message": "Activity registration is now open! Sign up for your favorite extracurricular activities before the end of this month. Limited spots available.",
+        "start_date": None,
+        "end_date": "2025-03-31",
+        "created_by": "principal",
+        "created_at": "2025-03-01"
+    },
+    {
+        "_id": 2,
+        "title": "Spring Sports Playoffs",
+        "message": "The spring sports playoffs are coming soon! All teams will compete on April 15th. Good luck to all participants!",
+        "start_date": "2025-04-01",
+        "end_date": "2025-04-20",
+        "created_by": "principal",
+        "created_at": "2025-03-01"
     }
 ]
